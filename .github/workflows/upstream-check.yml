@@ -1,0 +1,35 @@
+# Every Monday, compares each copied plugin with its upstream folder and opens an issue when upstream changed.
+name: upstream-check
+
+on:
+  schedule:
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Tests
+        run: tests/check-upstream_test.sh
+      - name: Compare with upstream
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          scripts/check-upstream.sh > report.txt
+          code=$?
+          set -e
+          cat report.txt
+          if [ "$code" -eq 1 ]; then exit 1; fi
+          if [ "$code" -eq 10 ]; then
+            title="Upstream changed: $(grep -o '^[a-z0-9-]*: upstream' report.txt | cut -d: -f1 | paste -sd, -)"
+            if [ -z "$(gh issue list --state open --search "\"$title\" in:title" --json number --jq '.[].number')" ]; then
+              gh issue create --title "$title" --body-file report.txt
+            fi
+          fi

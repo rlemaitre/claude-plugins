@@ -1,0 +1,17 @@
+{
+  "name": "rlemaitre",
+  "owner": {
+    "name": "Raphaël Lemaitre"
+  },
+  "metadata": {
+    "description": "Personal Claude Code plugins"
+  },
+  "plugins": [
+    {
+      "name": "productivity",
+      "displayName": "Productivity",
+      "description": "Anthropic's productivity plugin (tasks, memory, daily updates) without bundled MCP servers: it uses the connectors you already have.",
+      "source": "./plugins/productivity"
+    }
+  ]
+}
