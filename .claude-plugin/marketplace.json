@@ -12,6 +12,12 @@
       "displayName": "Productivity",
       "description": "Anthropic's productivity plugin (tasks, memory, daily updates) without bundled MCP servers: it uses the connectors you already have.",
       "source": "./plugins/productivity"
+    },
+    {
+      "name": "kitty-image",
+      "displayName": "Kitty image",
+      "description": "hood's kitty-image plugin (show PNG and SVG images inline in kitty-graphics terminals) without the prompt.compose hook that organization security defaults skip.",
+      "source": "./plugins/kitty-image"
     }
   ]
 }

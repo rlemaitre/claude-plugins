@@ -1,0 +1,1 @@
+{ "name": "kitty-image", "version": "0.1.0-rlemaitre.1", "description": "Lets Claude show PNG images inline via the kitty graphics protocol", "types": "./types/index.d.ts" }
