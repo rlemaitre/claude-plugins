@@ -11,7 +11,9 @@ Changes from upstream:
   organizations, the built-in `cc-plugin-sec-default` plugin runs before user plugins and keeps them out of the system
   prompt, so the hook never ran and every session started with a "prompt.compose hook was skipped" warning. The
   guidance lives in the user's `CLAUDE.md` instead; the tool's own description carries the same nudge.
-- `.claude-plugin/plugin.json`: version `0.1.0-rlemaitre.1`.
+- `.claude-plugin/plugin.json`: version `0.1.0-rlemaitre.2`; the description says SVG too.
+- `README.md`: install from `rlemaitre/claude-plugins`; the Behavior section no longer mentions the system prompt
+  section.
 - The upstream `.claude-plugin/marketplace.json` is not copied: this repository's marketplace lists the plugin.
 
 The `show_image` tool and its rendering are unchanged.

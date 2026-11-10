@@ -24,7 +24,8 @@ To sync a plugin:
 
 1. Read the upstream diff for the plugin folder.
 2. Copy the upstream folder over `plugins/<name>/`, keeping the changes listed in its `NOTICE.md` (for `productivity`:
-   no `.mcp.json`, the `CONNECTORS.md` wording; for `kitty-image`: no `prompt.compose` hook, no `marketplace.json`).
+   no `.mcp.json`, the `CONNECTORS.md` wording; for `kitty-image`: no `prompt.compose` hook, no `marketplace.json`, the README install
+   lines, the `plugin.json` description).
 3. Update `tree=` in `plugins/<name>/.upstream` and the version line in `NOTICE.md`.
 4. Run `tests/check-upstream_test.sh` and `scripts/check-upstream.sh` (it must say "up to date").
 
