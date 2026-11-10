@@ -7,15 +7,15 @@ A Claude Code mod that lets Claude show PNG and SVG images inline in your termin
 At the prompt of a Claude Code terminal session:
 
 ```
-/plugin install kitty-image --marketplace hood/claude-kitty-image
+/plugin marketplace add rlemaitre/claude-plugins
+/plugin install kitty-image@rlemaitre
 ```
-
-Answer `y` to add the marketplace, then pick a scope.
 
 From a shell:
 
 ```
-claude plugin install kitty-image --marketplace hood/claude-kitty-image
+claude plugin marketplace add rlemaitre/claude-plugins
+claude plugin install kitty-image@rlemaitre
 ```
 
 ## Tool
@@ -33,7 +33,7 @@ claude plugin install kitty-image --marketplace hood/claude-kitty-image
 
 ## Behavior
 
-- Adds a short system prompt section telling Claude to draw charts and diagrams instead of ASCII art, so no CLAUDE.md changes are needed. (Organization-managed plugins can block user plugins from editing the system prompt; the tool's own description carries the same nudge as a fallback.)
+- Adds no system prompt section (see `NOTICE.md`): the tool's own description tells Claude to draw charts and diagrams instead of ASCII art. For a stronger nudge, add a short section to your `CLAUDE.md`.
 - After sending a picture, the mod checks it was actually drawn. If the terminal only shows the `alt` text, the tool returns an error so Claude falls back to text instead of describing a chart nobody can see.
 
 ## Requirements
