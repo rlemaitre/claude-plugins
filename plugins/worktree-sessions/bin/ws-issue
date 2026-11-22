@@ -1,0 +1,101 @@
+#!/usr/bin/env bash
+# Linear issue -> worktree + Claude analysis and brainstorm session: `ws-issue [--idea] ABC-123 [description...]`.
+# Run from the git checkout or any of its worktrees.
+# Branch: <gh-user>/<issue-id>-<slug of the description, or of the issue title>, created with worktrunk (`wt`).
+# Takes the issue if nobody has it and moves it from Todo/Backlog to In Progress.
+# Writes the session brief to BRIEFS_DIR, then opens a Ghostty tab running a Claude session in auto mode that
+# analyzes the issue and brainstorms the open questions; outside Ghostty, prints the command.
+# With --idea, also opens IntelliJ on the worktree and the brief.
+set -euo pipefail
+# shellcheck source=../lib/common.sh
+source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../lib/common.sh"
+
+usage="usage: ws-issue [--idea] <ISSUE-ID> [description...]"
+idea=false
+if [[ "${1:-}" == --idea ]]; then idea=true; shift; fi
+issue="${1:-}"
+[[ "${issue}" =~ ^[A-Za-z]+-[0-9]+$ ]] || die "${usage}"
+shift
+issue="$(tr '[:lower:]' '[:upper:]' <<<"${issue}")"
+id="$(tr '[:upper:]' '[:lower:]' <<<"${issue}")"
+description="$*"
+
+load_config
+cd "${TOP}"
+
+issue_json="$(linear-cli issues get "${issue}" --output json 2>/dev/null || true)"
+title="$(jq -r '.title // empty' <<<"${issue_json}" 2>/dev/null || true)"
+[[ -n "${title}" ]] || die "Linear issue not found: ${issue}"
+
+# Starting work: take the issue if nobody has it, then move it to In Progress if it has not started.
+# An issue assigned to someone else is left as it is. A Linear failure only warns: the worktree matters more.
+me="$(linear-cli whoami --output json 2>/dev/null | jq -r '.email // empty' || true)"
+assignee="$(jq -r '.assignee.email // empty' <<<"${issue_json}")"
+state="$(jq -r '.state.name // empty' <<<"${issue_json}")"
+if [[ -z "${assignee}" ]]; then
+  if linear-cli issues assign "${issue}" me --quiet >/dev/null; then
+    echo "Linear: ${issue} assigned to me"
+    assignee="${me}"
+  else
+    echo "Linear: could not assign ${issue}" >&2
+  fi
+fi
+if [[ -n "${me}" && "${assignee}" == "${me}" && ("${state}" == Todo || "${state}" == Backlog) ]]; then
+  if linear-cli issues update "${issue}" --state "In Progress" --quiet >/dev/null; then
+    echo "Linear: ${issue} moved from ${state} to In Progress"
+  else
+    echo "Linear: could not move ${issue} to In Progress" >&2
+  fi
+elif [[ -n "${assignee}" && "${assignee}" != "${me}" ]]; then
+  echo "Linear: ${issue} is assigned to ${assignee}; left as it is"
+fi
+
+branch="$(gh api user --jq .login)/$(slugify "${issue} ${description:-${title}}")"
+echo "Creating worktree for ${issue}: ${title}"
+git fetch --quiet origin
+wt switch --create "${branch}" --no-cd
+worktree_dir="$(worktree_of "${branch}")"
+[[ -n "${worktree_dir}" ]] || die "No worktree found for branch ${branch}"
+
+# The brief keeps what the ticket said and what Claude was asked when work started. The brainstorm result goes
+# to NOTES_DIR, never into the repository.
+mkdir -p "${BRIEFS_DIR}" "${NOTES_DIR}"
+brief="${BRIEFS_DIR}/$(date +%F)_${id}_brief.md"
+plan="${NOTES_DIR}/$(date +%F)_${id}-plan_draft.md"
+cat >"${brief}" <<EOF
+Analysis and brainstorm session for Linear issue ${issue}. This is not implementation: do not edit code.
+
+# ${issue}: ${title}
+
+$(jq -r '.url // empty' <<<"${issue_json}")
+
+$(jq -r '.description // "(no description)"' <<<"${issue_json}")
+
+# What I want
+
+1. Read the issue above. Use the Linear tools for comments, parent and related issues if they are available.
+2. Explore the code and docs this issue touches, starting from CLAUDE.md and the docs it points to.
+3. Report, briefly:
+   - what the issue asks, in your own words, and what it does not ask;
+   - how the code behaves today, with file references;
+   - open questions and risks;
+   - two or three approaches with their tradeoffs, and the one you recommend.
+4. Then use the superpowers:brainstorming skill to settle the open questions with me, one at a time, before any plan.
+5. Write the result of the brainstorm (the design, then the implementation plan if we write one) to
+   ${plan} once I approve it. This overrides the skills' default location:
+   nothing goes into the repository.
+EOF
+
+[[ "${idea}" == true ]] && open_idea "${worktree_dir}" "${brief}"
+
+# A fixed session ID lets `claude --resume <id>` find this session even if other sessions run in the worktree.
+# `--` ends the options: --add-dir takes a list of directories and would swallow the prompt too.
+session_id="$(uuidgen | tr '[:upper:]' '[:lower:]')"
+# shellcheck disable=SC2086 # EXTRA_DIRS is a space-separated list
+claude_cmd="claude --session-id ${session_id} --permission-mode auto$(add_dirs "${NOTES_DIR}" "${BRIEFS_DIR}" ${EXTRA_DIRS}) -- \"\$(cat $(printf '%q' "${brief}"))\""
+open_tab "${worktree_dir}" "${claude_cmd}" "🧑‍💻 [${issue}] ${title}"
+
+echo "Worktree: ${worktree_dir}"
+echo "Brief: ${brief}"
+echo "Plan: ${plan} (written by the session)"
+echo "Resume: ws-resume ${issue}"

@@ -30,6 +30,12 @@
       "displayName": "IntelliJ",
       "description": "Keeps the .idea files IntelliJ rewrites on its own out of Claude's commits, and notifies you when IntelliJ waits for you to approve a run configuration.",
       "source": "./plugins/intellij"
+    },
+    {
+      "name": "worktree-sessions",
+      "displayName": "Worktree sessions",
+      "description": "Start work in its own worktree and Claude session: a Linear issue (analysis then brainstorm) or a PR (read-only pre-review), and resume either later.",
+      "source": "./plugins/worktree-sessions"
     }
   ]
 }

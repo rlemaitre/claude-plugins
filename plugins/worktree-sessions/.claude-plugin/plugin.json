@@ -1,0 +1,8 @@
+{
+  "name": "worktree-sessions",
+  "version": "1.0.0",
+  "description": "Start work in its own worktree and Claude session: a Linear issue (analysis then brainstorm) or a PR (read-only pre-review), and resume either later",
+  "author": {
+    "name": "Raphaël Lemaitre"
+  }
+}
