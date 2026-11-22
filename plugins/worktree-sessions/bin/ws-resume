@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+# Resume the Claude session of an issue or a PR review in its worktree: `ws-resume ABC-123 [pick]` or `ws-resume 42`.
+# Finds the worktree and opens a Ghostty tab named like the original one. When an issue has several worktrees,
+# [pick] keeps those whose path contains it; if several remain, asks with gum in a terminal, or lists them.
+# With one Claude session in the worktree it continues it; with several it shows Claude's picker.
+# Issues resume in auto mode, reviews in plan mode, like ws-issue and ws-pr-review. Outside Ghostty, prints the
+# command.
+set -euo pipefail
+# shellcheck source=../lib/common.sh
+source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../lib/common.sh"
+
+usage="usage: ws-resume <ISSUE-ID [pick] | PR number or URL>"
+arg="${1:-}"
+load_config
+cd "${TOP}"
+
+case "${arg}" in
+  *github.com/*/pull/* | [0-9]*)
+    pr="$(sed -E 's|.*/pull/([0-9]+).*|\1|' <<<"${arg}")"
+    [[ "${pr}" =~ ^[0-9]+$ ]] || die "${usage}"
+    repo_slug="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
+    pr_json="$(gh pr view "${pr}" --repo "${repo_slug}" --json title,headRefName)" || die "PR not found: ${pr}"
+    worktree_dir="$(worktree_of "$(jq -r .headRefName <<<"${pr_json}")")"
+    [[ -n "${worktree_dir}" ]] || die "No worktree for PR #${pr}: run ws-pr-review ${pr}"
+    tab_title="🔍 [#${pr}] $(jq -r .title <<<"${pr_json}")"
+    mode=plan
+    dirs="$(git -C "${worktree_dir}" rev-parse --absolute-git-dir)/pr-review"
+    for rule in ${REVIEW_RULES}; do
+      if [[ -d "${rule}" ]]; then dirs+=" ${rule}"; else dirs+=" $(dirname "${rule}")"; fi
+    done
+    ;;
+  [A-Za-z]*-[0-9]*)
+    issue="$(tr '[:lower:]' '[:upper:]' <<<"${arg}")"
+    id="$(tr '[:upper:]' '[:lower:]' <<<"${arg}")"
+    candidates="$(worktrees | awk -v id="${id}" 'index($2, "/" id "-") {print $1}')"
+    [[ -n "${candidates}" ]] || die "No worktree for ${issue}: run ws-issue ${issue}"
+    if [[ -n "${2:-}" ]]; then
+      candidates="$(grep -F -- "$2" <<<"${candidates}")" || die "No worktree of ${issue} matches $2"
+    fi
+    if [[ "$(wc -l <<<"${candidates}")" -gt 1 ]]; then
+      [[ -t 0 && -t 1 ]] || die "Several worktrees for ${issue}; pick one with ws-resume ${issue} <part of its path>:
+${candidates}"
+      options=()
+      while IFS= read -r c; do options+=("${c}"); done <<<"${candidates}"
+      worktree_dir="$(gum choose --header "Worktrees of ${issue}" "${options[@]}")"
+    else
+      worktree_dir="${candidates}"
+    fi
+    title="$(linear-cli issues get "${issue}" --output json 2>/dev/null | jq -r '.title // empty' || true)"
+    tab_title="🧑‍💻 [${issue}] ${title:-$(basename "${worktree_dir}")}"
+    mode=auto
+    dirs="${NOTES_DIR} ${BRIEFS_DIR}"
+    ;;
+  *) die "${usage}" ;;
+esac
+
+# Claude keeps each directory's sessions under <config dir>/projects, every non-alphanumeric character turned into "-".
+sessions_dir="${CLAUDE_CONFIG_DIR:-${HOME}/.claude}/projects/${worktree_dir//[^A-Za-z0-9]/-}"
+count=0
+[[ -d "${sessions_dir}" ]] && count="$(find "${sessions_dir}" -maxdepth 1 -name '*.jsonl' | wc -l | tr -d ' ')"
+case "${count}" in
+  0) die "No Claude session in ${worktree_dir} yet" ;;
+  1) resume=--continue ;;
+  *) resume=--resume ;;
+esac
+
+# shellcheck disable=SC2086 # dirs and EXTRA_DIRS are space-separated lists
+open_tab "${worktree_dir}" "claude ${resume} --permission-mode ${mode}$(add_dirs ${dirs} ${EXTRA_DIRS})" "${tab_title}"
+echo "Worktree: ${worktree_dir} (${count} Claude session(s))"

@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+# PR -> worktree + read-only Claude pre-review, then a follow-up session: `ws-pr-review <PR number or URL>`.
+# Run from the git checkout or any of its worktrees. Opens IntelliJ on the PR worktree and, in a Ghostty tab:
+# 1. writes a read-only pre-review to REVIEWS_DIR/<date>_pr-<N>_pre-review.md,
+# 2. opens it in IntelliJ,
+# 3. resumes that same Claude session in plan mode for follow-up questions.
+# Outside Ghostty, prints the script to run instead.
+set -euo pipefail
+# shellcheck source=../lib/common.sh
+source "$(dirname "$(realpath "${BASH_SOURCE[0]}")")/../lib/common.sh"
+
+usage="usage: ws-pr-review <PR number or URL>"
+case "${1:-}" in
+  *github.com/*/pull/*) pr="$(sed -E 's|.*/pull/([0-9]+).*|\1|' <<<"$1")" ;;
+  *[!0-9]* | "") die "${usage}" ;;
+  *) pr="$1" ;;
+esac
+
+load_config
+cd "${TOP}"
+repo_slug="$(gh repo view --json nameWithOwner --jq .nameWithOwner)"
+out="${REVIEWS_DIR}/$(date +%F)_pr-${pr}_pre-review.md"
+log="${out%.md}.log"
+
+meta_json="$(gh pr view "${pr}" --repo "${repo_slug}" \
+  --json number,title,body,url,state,author,baseRefName,headRefName,isDraft,files,commits)" ||
+  die "PR not found: ${pr}"
+title="$(jq -r .title <<<"${meta_json}")"
+branch="$(jq -r .headRefName <<<"${meta_json}")"
+state="$(jq -r .state <<<"${meta_json}")"
+[[ "${state}" == OPEN ]] || die "PR #${pr} is ${state}, nothing to review"
+
+echo "Reviewing #${pr}: ${title}"
+wt switch "pr:${pr}" --no-cd
+worktree_dir="$(worktree_of "${branch}")"
+[[ -n "${worktree_dir}" ]] || die "No worktree found for branch ${branch}"
+open_idea "${worktree_dir}"
+
+# Session inputs live in the worktree's git dir: per worktree, never tracked, kept for the follow-up session.
+ctx="$(git -C "${worktree_dir}" rev-parse --absolute-git-dir)/pr-review"
+mkdir -p "${ctx}" "${REVIEWS_DIR}"
+printf '%s\n' "${meta_json}" >"${ctx}/pr.json"
+gh pr diff "${pr}" --repo "${repo_slug}" >"${ctx}/pr.diff"
+
+# File links in the review are relative to the review file, so an IDE opens them from the Markdown preview.
+link_prefix="$(python3 -c 'import os, sys; print(os.path.relpath(sys.argv[1], sys.argv[2]))' "${worktree_dir}" "${REVIEWS_DIR}")"
+
+# Each review rule entry is a file or a folder of rule files. Claude may read their folders.
+rules="" rule_dirs=""
+for rule in ${REVIEW_RULES}; do
+  rules+=$'\n'"  - ${rule}"
+  if [[ -d "${rule}" ]]; then rule_dirs+=" ${rule}"; else rule_dirs+=" $(dirname "${rule}")"; fi
+done
+
+cat >"${ctx}/prompt.md" <<EOF
+You are pre-reviewing GitHub PR #${pr} of ${repo_slug} for me. I will do the real review; you prepare it.
+This is read-only: do not change anything.
+
+Inputs:
+- PR metadata (title, description, files, commits): ${ctx}/pr.json
+- PR diff against its base: ${ctx}/pr.diff
+- The PR branch is checked out in the current directory. Read surrounding code, callers and tests as needed.
+- Team review rules: REVIEW.md and CLAUDE.md at the repository root, when they exist.
+$( [[ -n "${rules}" ]] && echo "- Review rules to check, every one (files, or folders of rule files):${rules}")
+
+File links: write every reference to a file of the repository as a Markdown link
+\`[<path>:<line>](${link_prefix}/<path>#L<line>)\`, where <path> is relative to the repository root, for example
+\`[src/Foo.kt:42](${link_prefix}/src/Foo.kt#L42)\`. Without a line: \`[<path>](${link_prefix}/<path>)\`.
+
+Output only the Markdown document below, nothing before or after it:
+
+# Pre-review of PR #${pr}: <title>
+
+<PR URL> · author · base branch · <N> files, +<added> -<removed>
+
+## 1. What it does
+3 to 6 bullets: the problem, the approach, and what changes in behavior. Say what the description claims but the
+diff does not do.
+
+## 2. Where to start reading
+The best entry points into the diff, in reading order: 1 to 3 numbered items, each a file link and the symbol
+(the endpoint, handler, use case or state change the PR is built around), with one line on why to start there.
+Then one line on the order to read the remaining changed files, and which ones only need a skim (generated code,
+renames, test fixtures).
+
+## 3. Points of vigilance
+Where I should spend my attention: risky areas, behavior changes, concurrency, migrations, wire or API
+contracts, missing tests. One bullet each, with a file link.
+
+## 4. Findings
+Numbered, most severe first. Each: **#N · severity (high/medium/low) · <file link>**, then what is wrong, why
+it matters, and a suggested fix, in two to four sentences. Only findings you verified in the code; write
+"No findings." if there are none.
+
+## 5. Questions for the author
+Things the diff alone cannot answer. Omit the section if there are none.
+EOF
+
+# The tab runs this: headless read-only review into the file, opened in IntelliJ, then the same session resumed in
+# plan mode. A fixed session ID makes the resume pick this review even if other sessions run in the worktree.
+session_id="$(uuidgen | tr '[:upper:]' '[:lower:]')"
+q() { printf '%q' "$1"; }
+runner="${ctx}/run.sh"
+# shellcheck disable=SC2086 # rule_dirs and EXTRA_DIRS are space-separated lists
+cat >"${runner}" <<EOF
+#!/usr/bin/env bash
+cd $(q "${worktree_dir}")
+echo "Pre-review of #${pr} running..."
+if claude -p "\$(cat $(q "${ctx}/prompt.md"))" --session-id ${session_id} \\
+  --tools "Read,Glob,Grep"$(add_dirs "${ctx}" ${rule_dirs}) >$(q "${out}") 2>$(q "${log}") &&
+  [ -s $(q "${out}") ]; then
+  rm -f $(q "${log}")
+  command -v idea >/dev/null && idea $(q "${worktree_dir}") $(q "${out}") >/dev/null 2>&1
+  exec claude --resume ${session_id} --permission-mode plan$(add_dirs "${ctx}" ${rule_dirs} ${EXTRA_DIRS})
+else
+  echo "Pre-review failed:"
+  cat $(q "${log}")
+fi
+EOF
+chmod +x "${runner}"
+
+open_tab "${worktree_dir}" "$(q "${runner}")" "🔍 [#${pr}] ${title}"
+echo "Worktree: ${worktree_dir}"
+echo "Pre-review: ${out}"
+echo "Resume: ws-resume ${pr}"
