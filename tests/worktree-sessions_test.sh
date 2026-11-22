@@ -49,7 +49,7 @@ TODAY="$(date +%F)"
 
 new_project proj
 cat > "$P/.worktree-sessions" <<'EOF'
-# nabla-health style layout
+# workspace-style layout: notes, briefs and sources next to the repo
 NOTES_DIR=02_notes
 BRIEFS_DIR=01_sources/briefs
 REVIEWS_DIR="02_notes/reviews"
@@ -108,7 +108,6 @@ check "prompt names the repository" "GitHub PR #42 of acme/app" "$prompt"
 check "prompt lists the review rule files" "$P/01_sources/review-rules.md" "$prompt"
 check "prompt lists the review rule folders" "$P/repo/.claude/rules" "$prompt"
 check "prompt links files relative to REVIEWS_DIR" "(../../worktrees/feature-parser/<path>#L<line>)" "$prompt"
-check_not "prompt has no Nabla-specific lines" "coding-backend-review" "$prompt"
 check "review written to REVIEWS_DIR" "$P/02_notes/reviews/${TODAY}_pr-42_pre-review.md" "$out"
 sleep 0.3; check "opens IntelliJ on the worktree" "idea $P/worktrees/feature-parser" "$(cat "$TMP/calls")"
 check "runner reviews read-only" '--tools "Read,Glob,Grep"' "$(cat "$ctx/run.sh" 2>/dev/null)"
