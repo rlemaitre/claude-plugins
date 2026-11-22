@@ -7,7 +7,19 @@ const TOOL = 'mcp__kitty-image__show_image'
 const KEEP = 12
 const MAX = 2 * 1024 * 1024
 const SVG_WIDTH_PX = 1600
-const PATH = '/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin'
+// Appended to the user's own PATH: GUI-launched sessions often get a bare one.
+const EXTRA_PATH = [
+  '/opt/homebrew/bin',
+  '/usr/local/bin',
+  '/opt/local/bin',
+  '/home/linuxbrew/.linuxbrew/bin',
+  '$HOME/.nix-profile/bin',
+  '/run/current-system/sw/bin',
+].join(':')
+const NO_RSVG =
+  'rsvg-convert is not installed, so SVGs cannot be drawn. Tell the user to install librsvg ' +
+  '(macOS: `brew install librsvg`, Debian/Ubuntu: `apt install librsvg2-bin`, Fedora: `dnf install librsvg2-tools`, Arch: `pacman -S librsvg`). ' +
+  'Meanwhile show a PNG via `path` (graphviz `dot -Tpng`, gnuplot, matplotlib) or use text.'
 
 const shown = atom({ plugin: 'kitty-image', key: 'shown' } as const, [], { shape: 'shown-1' })
 
@@ -66,9 +78,18 @@ export const register: Register = on => {
       const bg = input.background ? `-b "$2"` : ''
       const src = input.svg ? '' : '"$3"'
       const ran = await $.process.run(
-        ['sh', '-c', `rsvg-convert -w "$1" ${bg} ${src} | base64`, 'sh', String(SVG_WIDTH_PX), input.background ?? '', path ?? ''],
-        { stdin: input.svg, env: { PATH }, timeoutMs: 20_000 },
+        [
+          'sh',
+          '-c',
+          `export PATH="$PATH:${EXTRA_PATH}"; command -v rsvg-convert >/dev/null || exit 127; rsvg-convert -w "$1" ${bg} ${src} | base64`,
+          'sh',
+          String(SVG_WIDTH_PX),
+          input.background ?? '',
+          path ?? '',
+        ],
+        { stdin: input.svg, timeoutMs: 20_000 },
       )
+      if (ran.exitCode === 127) return { deny: NO_RSVG }
       base64 = ran.stdout.replace(/\s+/g, '')
       if (ran.exitCode !== 0 || !base64) return { deny: `rsvg-convert failed: ${ran.stderr.trim().slice(0, 400) || 'no output'}` }
       if ((base64.length * 3) / 4 > MAX) return { deny: 'rendered PNG over 2 MiB; simplify the SVG' }

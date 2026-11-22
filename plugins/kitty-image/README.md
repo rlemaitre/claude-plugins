@@ -38,7 +38,16 @@ claude plugin install kitty-image@rlemaitre
 
 ## Requirements
 
-`rsvg-convert` for SVG (`brew install librsvg`).
+`rsvg-convert` for SVG. PNGs passed by `path` work without it.
+
+| OS | Install |
+|---|---|
+| macOS | `brew install librsvg` |
+| Debian/Ubuntu | `apt install librsvg2-bin` |
+| Fedora | `dnf install librsvg2-tools` |
+| Arch | `pacman -S librsvg` |
+
+The mod uses your own `PATH`, plus Homebrew, MacPorts, Linuxbrew and Nix dirs as fallbacks. Without it, the tool tells Claude what to install and to fall back to PNGs or text.
 
 ## Terminal support
 
