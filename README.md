@@ -11,6 +11,7 @@ Raph's personal [Claude Code](https://code.claude.com) plugin marketplace.
 | `md-show` | Shows a Markdown file as a readable HTML page, with Mermaid diagrams, in a terminal-browser split. Needs pandoc, mmdc and terminal-browser, and a sandbox exclusion: see `plugins/md-show/README.md`. | none (own plugin) |
 | `intellij` | Hooks that keep the `.idea` files IntelliJ rewrites on its own out of Claude's commits, and notify you when IntelliJ waits for you to approve a run configuration. See `plugins/intellij/README.md`. | none (own plugin) |
 | `worktree-sessions` | `/worktree-sessions:issue`, `pr-review` and `resume`: start a Linear issue or a PR review in its own worktree and Claude session (Ghostty tab, IntelliJ), and resume it later. See `plugins/worktree-sessions/README.md`. | none (own plugin) |
+| `pr-flow` | `/pr-flow:pr-gate`, `pr-babysit`, `pr-review-guide` and `review-feedback`: a pre-PR gate with reviews and a comprehension check, a PR babysitter, review guides, and a monthly loop that turns repeated review comments into rules. See `plugins/pr-flow/README.md`. | none (own plugin) |
 
 ## Install
 
@@ -20,6 +21,7 @@ Raph's personal [Claude Code](https://code.claude.com) plugin marketplace.
     claude plugin install md-show@rlemaitre
     claude plugin install intellij@rlemaitre
     claude plugin install worktree-sessions@rlemaitre
+    claude plugin install pr-flow@rlemaitre
 
 ## Keeping copies in sync with upstream
 
@@ -39,3 +41,4 @@ To sync a plugin:
 
     tests/check-upstream_test.sh
     tests/worktree-sessions_test.sh
+    tests/pr-flow_test.sh
