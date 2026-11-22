@@ -4,9 +4,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- No script runs: diagrams are inline SVG rendered by mermaid.lua, and a script tag or an onload= in a
-     rendered file is blocked. -->
-<meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'">
+<!-- No script runs and nothing loads from the network: diagrams are inline SVG rendered by mermaid.lua, and a
+     script tag, an onload=, a form or a remote image or stylesheet in a rendered file is blocked. Local images
+     next to the source file still show. -->
+<meta http-equiv="Content-Security-Policy"
+      content="default-src 'none'; img-src file: data:; style-src 'unsafe-inline'; font-src file: data:; form-action 'none'">
 <title>$pagetitle$</title>
 <base href="$base$">
 <style>
