@@ -27,7 +27,18 @@ pandoc "$src" --from gfm --to html5 --standalone \
 tb() { env -u XDG_RUNTIME_DIR terminal-browser "$@"; }
 
 if tb ls 2>/dev/null | grep -q '(this tab)'; then
-  tb new-tab "$out"
+  tb new-tab "$out" >/dev/null 2>&1 && { echo "md-show: opened in a new terminal-browser tab"; exit 0; }
+elif tb open "$out" --split right >/dev/null 2>&1; then
+  echo "md-show: opened in a terminal-browser split"
+  exit 0
+fi
+
+# terminal-browser needs a terminal with the kitty graphics protocol. Elsewhere (Claude's desktop app, an IDE
+# terminal), show the page in the default browser.
+opener="$(command -v open || command -v xdg-open || true)"
+if [[ -n "$opener" ]] && "$opener" "$out"; then
+  echo "md-show: terminal-browser cannot display here, opened in the default browser: $out"
 else
-  tb open "$out" --split right
+  echo "md-show: no way to display the page here; open it by hand: $out" >&2
+  exit 1
 fi

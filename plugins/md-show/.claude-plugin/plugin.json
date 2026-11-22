@@ -1,6 +1,6 @@
 {
   "name": "md-show",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Show a Markdown file as a readable HTML page, with Mermaid diagrams, in a terminal-browser split next to the terminal",
   "author": {
     "name": "Raphaël Lemaitre"
