@@ -9,6 +9,7 @@ Raph's personal [Claude Code](https://code.claude.com) plugin marketplace.
 | `productivity` | Anthropic's productivity plugin (tasks, memory, daily updates) without bundled MCP servers: it uses the connectors already configured in Claude Code. See `plugins/productivity/NOTICE.md`. | [anthropics/knowledge-work-plugins](https://github.com/anthropics/knowledge-work-plugins/tree/main/productivity) (Apache-2.0) |
 | `kitty-image` | hood's kitty-image plugin (inline images in kitty-graphics terminals) without its `prompt.compose` hook, which the built-in `cc-plugin-sec-default` skips in Team and Enterprise organizations. See `plugins/kitty-image/NOTICE.md`. | [hood/claude-kitty-image](https://github.com/hood/claude-kitty-image) (MIT) |
 | `md-show` | Shows a Markdown file as a readable HTML page, with Mermaid diagrams, in a terminal-browser split. Needs pandoc, mmdc and terminal-browser, and a sandbox exclusion: see `plugins/md-show/README.md`. | none (own plugin) |
+| `intellij` | Hooks that keep the `.idea` files IntelliJ rewrites on its own out of Claude's commits, and notify you when IntelliJ waits for you to approve a run configuration. See `plugins/intellij/README.md`. | none (own plugin) |
 
 ## Install
 
@@ -16,6 +17,7 @@ Raph's personal [Claude Code](https://code.claude.com) plugin marketplace.
     claude plugin install productivity@rlemaitre
     claude plugin install kitty-image@rlemaitre
     claude plugin install md-show@rlemaitre
+    claude plugin install intellij@rlemaitre
 
 ## Keeping copies in sync with upstream
 
