@@ -18,6 +18,12 @@
       "displayName": "Kitty image",
       "description": "hood's kitty-image plugin (show PNG and SVG images inline in kitty-graphics terminals) without the prompt.compose hook that organization security defaults skip.",
       "source": "./plugins/kitty-image"
+    },
+    {
+      "name": "md-show",
+      "displayName": "md-show",
+      "description": "Show a Markdown file as a readable HTML page, with Mermaid diagrams, in a terminal-browser split next to the terminal.",
+      "source": "./plugins/md-show"
     }
   ]
 }

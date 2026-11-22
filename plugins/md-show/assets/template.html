@@ -1,0 +1,51 @@
+<!doctype html>
+<!-- pandoc template for md-show: reading-first styles. pandoc copies this text as is. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- No script runs: diagrams are inline SVG rendered by mermaid.lua, and a script tag or an onload= in a
+     rendered file is blocked. -->
+<meta http-equiv="Content-Security-Policy" content="script-src 'none'; object-src 'none'">
+<title>$pagetitle$</title>
+<base href="$base$">
+<style>
+  :root {
+    --bg: #f4f4f0; --ink: #1a1a18; --muted: #5a5a55; --rule: #d6d5cf; --accent: #d01414; --code-bg: #e9e8e2;
+    --font-head: "Archivo", sans-serif;
+    --font-body: "Atkinson Hyperlegible Next", system-ui, sans-serif;
+    --font-mono: "Geist Mono", ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121212; --ink: #e6e6e2; --muted: #9a9a94; --rule: #333331; --accent: #ff4a4a; --code-bg: #1d1d1d; }
+  }
+  html { background: var(--bg); color: var(--ink); }
+  body { max-width: 66ch; margin: 0 auto; padding: 48px 24px 80px; background: none; color: inherit;
+         font: 400 18px/1.7 var(--font-body); }
+  h1, h2, h3, h4 { font-family: var(--font-head); font-weight: 700; line-height: 1.25; }
+  h1 { font-size: 36px; letter-spacing: -.01em; margin: 0 0 16px; }
+  h2 { font-size: 24px; margin: 48px 0 12px; }
+  h3 { font-size: 19px; margin: 32px 0 8px; }
+  p, ul, ol, table, pre, blockquote { margin: 0 0 16px; }
+  li { margin-bottom: 6px; }
+  a { color: var(--accent); }
+  code { font: 400 .85em var(--font-mono); background: var(--code-bg); padding: 2px 6px; border-radius: 4px; }
+  pre { background: var(--code-bg); padding: 14px 16px; border-radius: 6px; overflow-x: auto; }
+  pre code { padding: 0; background: none; }
+  blockquote { border-left: 4px solid var(--accent); padding: 2px 0 2px 18px; color: inherit; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  hr { border: 0; border-top: 1px solid var(--rule); margin: 32px 0; }
+  img, svg { max-width: 100%; height: auto; }
+  figure.diagram { margin: 24px 0; text-align: center; }
+  /* Diagrams use Mermaid's grayscale neutral theme: inverting it gives the dark version. */
+  @media (prefers-color-scheme: dark) { figure.diagram svg { filter: invert(1) hue-rotate(180deg); } }
+  ul.task-list { list-style: none; padding-left: 0; }
+  ul.task-list input { accent-color: var(--ink); margin-right: 10px; }
+</style>
+</head>
+<body>
+$body$
+</body>
+</html>
