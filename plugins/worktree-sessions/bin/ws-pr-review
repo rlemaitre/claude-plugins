@@ -98,6 +98,9 @@ EOF
 
 # The tab runs this: headless read-only review into the file, opened in IntelliJ, then the same session resumed in
 # plan mode. A fixed session ID makes the resume pick this review even if other sessions run in the worktree.
+# `claude -p` skips the folder trust prompt, so the review loads only user settings and no MCP server: hooks in the PR
+# branch's .claude/settings.json or servers in its .mcp.json must not run before anyone has read the PR. The
+# interactive resume goes through the trust prompt as usual.
 session_id="$(uuidgen | tr '[:upper:]' '[:lower:]')"
 q() { printf '%q' "$1"; }
 runner="${ctx}/run.sh"
@@ -107,7 +110,7 @@ cat >"${runner}" <<EOF
 cd $(q "${worktree_dir}")
 echo "Pre-review of #${pr} running..."
 if claude -p "\$(cat $(q "${ctx}/prompt.md"))" --session-id ${session_id} \\
-  --tools "Read,Glob,Grep"$(add_dirs "${ctx}" ${rule_dirs}) >$(q "${out}") 2>$(q "${log}") &&
+  --tools "Read,Glob,Grep" --setting-sources user --strict-mcp-config$(add_dirs "${ctx}" ${rule_dirs}) >$(q "${out}") 2>$(q "${log}") &&
   [ -s $(q "${out}") ]; then
   rm -f $(q "${log}")
   command -v idea >/dev/null && idea $(q "${worktree_dir}") $(q "${out}") >/dev/null 2>&1

@@ -112,6 +112,8 @@ check_not "prompt has no Nabla-specific lines" "coding-backend-review" "$prompt"
 check "review written to REVIEWS_DIR" "$P/02_notes/reviews/${TODAY}_pr-42_pre-review.md" "$out"
 sleep 0.3; check "opens IntelliJ on the worktree" "idea $P/worktrees/feature-parser" "$(cat "$TMP/calls")"
 check "runner reviews read-only" '--tools "Read,Glob,Grep"' "$(cat "$ctx/run.sh" 2>/dev/null)"
+check "review skips the PR's project settings and hooks" "--setting-sources user" "$(cat "$ctx/run.sh" 2>/dev/null)"
+check "review skips the PR's MCP servers" "--strict-mcp-config" "$(cat "$ctx/run.sh" 2>/dev/null)"
 check "runner resumes in plan mode" "--permission-mode plan" "$(cat "$ctx/run.sh" 2>/dev/null)"
 check "prints the runner outside Ghostty" "$ctx/run.sh" "$out"
 
