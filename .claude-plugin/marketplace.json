@@ -24,6 +24,12 @@
       "displayName": "md-show",
       "description": "Show a Markdown file as a readable HTML page, with Mermaid diagrams, in a terminal-browser split next to the terminal.",
       "source": "./plugins/md-show"
+    },
+    {
+      "name": "worktree-sessions",
+      "displayName": "Worktree sessions",
+      "description": "Start work in its own worktree and Claude session: a Linear issue (analysis then brainstorm) or a PR (read-only pre-review), and resume either later.",
+      "source": "./plugins/worktree-sessions"
     }
   ]
 }
