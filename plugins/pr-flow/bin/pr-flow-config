@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+# Prints what the pr-flow skills need about the current checkout, one KEY=value per line:
+# REPO, DEFAULT_BRANCH and GH_USER from gh; REVIEWS_DIR and REVIEW_RULES from the first .worktree-sessions file found
+# walking up from the checkout (the config the worktree-sessions plugin reads too), made absolute; CONFIG, the file.
+# The config is read as KEY=value text, never run, so a checked-in file cannot run commands.
+set -euo pipefail
+
+top="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo "Not in a git checkout" >&2; exit 1; }
+reviews_dir="$(git rev-parse --path-format=absolute --git-common-dir)/worktree-sessions/reviews"
+review_rules=""
+
+conf="" dir="${top}"
+while [[ "${dir}" != / ]]; do
+  if [[ -f "${dir}/.worktree-sessions" ]]; then conf="${dir}/.worktree-sessions"; break; fi
+  dir="$(dirname "${dir}")"
+done
+
+# Relative entries of a space-separated list, made absolute against the config's folder.
+absolute() {
+  local paths=() word
+  for word in $1; do
+    if [[ "${word}" == /* ]]; then paths+=("${word}"); else paths+=("${dir}/${word}"); fi
+  done
+  echo "${paths[*]-}"
+}
+
+if [[ -n "${conf}" ]]; then
+  while IFS= read -r line || [[ -n "${line}" ]]; do
+    [[ "${line}" =~ ^([A-Z_]+)=(.*)$ ]] || continue
+    key="${BASH_REMATCH[1]}" value="${BASH_REMATCH[2]}"
+    if [[ "${value}" =~ ^\"(.*)\"$ || "${value}" =~ ^\'(.*)\'$ ]]; then value="${BASH_REMATCH[1]}"; fi
+    case "${key}" in
+      REVIEWS_DIR) reviews_dir="$(absolute "${value}")" ;;
+      REVIEW_RULES) review_rules="$(absolute "${value}")" ;;
+    esac
+  done <"${conf}"
+fi
+
+{ read -r repo; read -r default_branch; } < <(gh repo view --json nameWithOwner,defaultBranchRef \
+  --jq '.nameWithOwner, .defaultBranchRef.name')
+echo "REPO=${repo}"
+echo "DEFAULT_BRANCH=${default_branch}"
+echo "GH_USER=$(gh api user --jq .login)"
+echo "REVIEWS_DIR=${reviews_dir}"
+echo "REVIEW_RULES=${review_rules}"
+echo "CONFIG=${conf}"

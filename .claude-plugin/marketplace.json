@@ -36,6 +36,12 @@
       "displayName": "Worktree sessions",
       "description": "Start work in its own worktree and Claude session: a Linear issue (analysis then brainstorm) or a PR (read-only pre-review), and resume either later.",
       "source": "./plugins/worktree-sessions"
+    },
+    {
+      "name": "pr-flow",
+      "displayName": "PR flow",
+      "description": "Pull request skills: a pre-PR gate with reviews and a comprehension check, a PR babysitter, review guides, and a monthly review-feedback loop that turns repeated comments into rules.",
+      "source": "./plugins/pr-flow"
     }
   ]
 }
