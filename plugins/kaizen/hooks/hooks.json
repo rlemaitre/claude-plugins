@@ -4,7 +4,7 @@
     "SessionStart": [
       {
         "matcher": "startup|resume|clear|compact",
-        "hooks": [{ "type": "command", "command": "cat \"${CLAUDE_PLUGIN_ROOT}/rules/core.md\"" }]
+        "hooks": [{ "type": "command", "command": "cat \"${CLAUDE_PLUGIN_ROOT}/rules/core.md\" \"${CLAUDE_PLUGIN_ROOT}/rules/communication.md\"" }]
       }
     ]
   }

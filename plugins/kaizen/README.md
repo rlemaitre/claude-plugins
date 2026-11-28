@@ -8,8 +8,10 @@ maintain, write, explore) to its workflow, with rules that improve from reviews 
 
 Skeleton. It:
 
-- prints `rules/core.md` from a classic `SessionStart` hook, so the rules reach every conversation, again after each
-  compaction, including in Team and Enterprise organizations, whose security plugin skips a mod's prompt hooks;
+- prints `rules/core.md` (asking, simplicity, enforcement, git, memory, documents) and `rules/communication.md` (the
+  reply style, adapted from i-have-adhd: see `NOTICE.md`) from a classic `SessionStart` hook, so the rules reach every
+  conversation, again after each compaction, including in Team and Enterprise organizations, whose security plugin
+  skips a mod's prompt hooks;
 - answers, from a mod (a TypeScript hooks module), `/kaizen doctor` with its version, whether its rules file is
   there, and whether `gh` is found.
 

@@ -21,11 +21,13 @@ else
   done
   command="$(jq -r '.hooks[0].command' <<<"$entry")"
   out="$(cd /tmp && CLAUDE_PLUGIN_ROOT="$PLUGIN" bash -c "$command")"
-  if [[ "$out" == "$(cat "$PLUGIN/rules/core.md")" ]]; then
-    pass "the hook prints rules/core.md"
+  if [[ -f "$PLUGIN/rules/communication.md" && "$out" == "$(cat "$PLUGIN/rules/core.md" "$PLUGIN/rules/communication.md")" ]]; then
+    pass "the hook prints rules/core.md then rules/communication.md"
   else
-    fail "the hook prints rules/core.md, got: $out"
+    fail "the hook prints rules/core.md then rules/communication.md"
   fi
+  words="$(wc -w <<<"$out" | tr -d " ")"
+  if (( words < 2500 )); then pass "the rules stay short ($words words)"; else fail "the rules stay short ($words words)"; fi
 fi
 
 if grep -q "prompt.context" "$PLUGIN/hooks/register.ts"; then
@@ -33,5 +35,16 @@ if grep -q "prompt.context" "$PLUGIN/hooks/register.ts"; then
 else
   pass "the mod no longer injects the rules through prompt.context"
 fi
+
+if grep -q "Copyright (c) 2026 Ayoub Ghriss" "$PLUGIN/NOTICE.md" 2>/dev/null; then
+  pass "NOTICE.md credits i-have-adhd"
+else
+  fail "NOTICE.md credits i-have-adhd"
+fi
+
+for heading in "## Asking" "## Simplicity" "## Enforcement" "## Work" "## Git and PRs" "## Code intelligence" "## Memory" \
+  "## Documents and images"; do
+  if grep -qxF "$heading" "$PLUGIN/rules/core.md"; then pass "core.md has $heading"; else fail "core.md has $heading"; fi
+done
 
 exit "$failures"
