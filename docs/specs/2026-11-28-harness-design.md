@@ -38,9 +38,10 @@ review, maintain, write, explore). It replaces Superpowers, ECC's rules and agen
   organization. Everything must work on both. A feature that only works on the Pro plan does not count as working.
 - **Enterprise org.** Claude Code's built-in security plugin (`cc-plugin-sec-default`) skips a user plugin's
   `prompt.compose` hooks (recorded in `plugins/kitty-image/NOTICE.md`) and its `prompt.context` hooks (seen on the
-  work Mac, 2026-11-28: "kaizen: its prompt.context hook was skipped"). Classic `SessionStart` command hooks and mod
-  slash commands do get through. The harness never relies on a mod's prompt hooks to reach the model. No local
-  `managed-settings.json` exists on the work Mac; console-pushed settings are unverified (see section 11, step 1).
+  work Mac, 2026-11-28: "kaizen: its prompt.context hook was skipped"). Classic `SessionStart` command hooks, mod
+  slash commands and mod `tool.check` guards do get through. The harness never relies on a mod's prompt hooks to
+  reach the model. No local `managed-settings.json` exists on the work Mac; console-pushed settings are unverified
+  (see section 11, step 1).
 - **Pro plan limits.** Agents, reviewers and parallel runs consume the allowance. The harness scales their number to
   the size of the change and runs narrow roles on cheaper models (`haiku`, `sonnet`).
 - **Work data stays on the work Mac.** Nothing from work (memory content, review findings, rules learned from work
@@ -407,6 +408,10 @@ Built from scratch inside the harness; it replaces the productivity plugin's tas
      draws in Rex only with `CLAUDE_CODE_FORCE_TERMINAL_IMAGES=1` (the dotfiles' `~/.zshenv` sets it; a session
      started before that change lacks it). Signing in to GitHub and Linear in the pane works and persists, but a paste
      goes to Claude's prompt, so PRs and issues are rendered from CLI data instead (6.3).
+   - Verified 2026-11-28 on both Macs, kaizen 0.3.0 installed from the marketplace: the session quotes the rules
+     (`## Simplicity` after `## Asking`); `git add -A` is refused with kaizen's reason. At work the refusal lists
+     `cc-plugin-sec-default, kaizen, cc-plugin-privacy`, so the organization's plugins let `tool.check` guards run.
+     The global `CLAUDE.md` is trimmed, `~/.claude/rules/` and `i-have-adhd` are gone.
 2. Then the core behavior (section 4), then one workflow end to end (Fix is the smallest), then the others.
 3. Superpowers and the absorbed plugins stay installed until the harness covers what they did; each is removed in its
    own step.
