@@ -46,3 +46,4 @@ To sync a plugin:
     tests/check-upstream_test.sh
     tests/worktree-sessions_test.sh
     tests/pr-flow_test.sh
+    tests/kaizen_test.sh

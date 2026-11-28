@@ -6,10 +6,12 @@ maintain, write, explore) to its workflow, with rules that improve from reviews 
 
 ## State
 
-Skeleton. It is a mod (a TypeScript hooks module) that:
+Skeleton. It:
 
-- adds a context block named `kaizen`, holding `rules/core.md`, to every conversation;
-- answers `/kaizen doctor` with its version, whether its rules file is there, and whether `gh` is found.
+- prints `rules/core.md` from a classic `SessionStart` hook, so the rules reach every conversation, again after each
+  compaction, including in Team and Enterprise organizations, whose security plugin skips a mod's prompt hooks;
+- answers, from a mod (a TypeScript hooks module), `/kaizen doctor` with its version, whether its rules file is
+  there, and whether `gh` is found.
 
 ## Requirements
 
@@ -22,6 +24,7 @@ Claude Code 2.1.311 or later (mods load with no setting there).
 
 ## Develop
 
-    claude plugin test plugins/kaizen        # tests
+    claude plugin test plugins/kaizen        # mod tests
+    tests/kaizen_test.sh                     # SessionStart hook tests
     claude plugin validate plugins/kaizen    # what the engine will load or refuse
     claude --plugin-dir plugins/kaizen       # a session with this folder loaded

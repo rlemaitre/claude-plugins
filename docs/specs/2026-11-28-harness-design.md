@@ -36,8 +36,10 @@ review, maintain, write, explore). It replaces Superpowers, ECC's rules and agen
 
 - **Two Macs, two plans.** Personal Mac (`athena`) on a Pro plan; work Mac (`nabla-mac-raphael`) in an Enterprise
   organization. Everything must work on both. A feature that only works on the Pro plan does not count as working.
-- **Enterprise org.** Claude Code's built-in security plugin skips `prompt.compose` hooks in Team and Enterprise
-  organizations (recorded in `plugins/kitty-image/NOTICE.md`). The harness never relies on `prompt.compose`. No local
+- **Enterprise org.** Claude Code's built-in security plugin (`cc-plugin-sec-default`) skips a user plugin's
+  `prompt.compose` hooks (recorded in `plugins/kitty-image/NOTICE.md`) and its `prompt.context` hooks (seen on the
+  work Mac, 2026-11-28: "kaizen: its prompt.context hook was skipped"). Classic `SessionStart` command hooks and mod
+  slash commands do get through. The harness never relies on a mod's prompt hooks to reach the model. No local
   `managed-settings.json` exists on the work Mac; console-pushed settings are unverified (see section 11, step 1).
 - **Pro plan limits.** Agents, reviewers and parallel runs consume the allowance. The harness scales their number to
   the size of the change and runs narrow roles on cheaper models (`haiku`, `sonnet`).
@@ -312,9 +314,10 @@ Built from scratch inside the harness; it replaces the productivity plugin's tas
   rule injection, tool-call guards, slash commands, tools, panes, session measures. Bun + TypeScript scripts only where
   a mod cannot do the job. Startup times measured on this Mac: mod none, Bun 15 ms, bash + jq 12 ms, Node 28 ms,
   `uv run --script` 37 ms, Go and Scala Native binaries 3 to 4 ms but with a build step.
-- **Rule injection:** through `prompt.context` (the first message's context blocks) or `session.append` (a hidden row
-  the model reads), never `prompt.compose`. Whether each survives a compaction is to be verified; the `session.compact`
-  event can re-inject after one if needed.
+- **Rule injection:** a classic `SessionStart` command hook in the plugin's `hooks/hooks.json`, beside the mod's
+  `modules`, on `startup|resume|clear|compact`, prints `rules/core.md`; its output becomes context, again after each
+  compaction. It is the route Superpowers uses, and it works in the Enterprise organization, where `prompt.context` and
+  `prompt.compose` hooks are skipped (section 3).
 - **Guards:** `tool.check` hooks. They refuse (`deny`) what is never allowed: `git add -A`, `git add .`,
   `git commit -a`, staging `.idea/` changes not made in the session, force-push. They put to Raph (`ask`, the permission
   dialog) what needs his OK each time: `git push`. A deny cannot be lifted by an OK in the chat; an ask can. Advisory
@@ -395,7 +398,10 @@ Built from scratch inside the harness; it replaces the productivity plugin's tas
    - Verified 2026-11-28 on athena (Claude Code 2.1.311, `--plugin-dir`, headless): `/kaizen doctor` answers; the
      model quotes the `kaizen` context block; after `/compact` in the same session it still quotes the rules text, so
      `prompt.context` blocks survive compaction with no extra hook.
-   - Work Mac: not verified yet.
+   - Verified 2026-11-28 on the work Mac (Enterprise org): `/kaizen doctor` answers; the `prompt.context` hook is
+     skipped by `cc-plugin-sec-default`; Superpowers' classic `SessionStart` context reaches the model. So kaizen 0.2.0
+     injects its rules through a classic `SessionStart` hook; on athena the rules appear once and come back after
+     `/compact` (`SessionStart:compact`).
    - terminal-browser sign-in to GitHub and Linear: not verified yet.
 2. Then the core behavior (section 4), then one workflow end to end (Fix is the smallest), then the others.
 3. Superpowers and the absorbed plugins stay installed until the harness covers what they did; each is removed in its
