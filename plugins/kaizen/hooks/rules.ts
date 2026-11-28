@@ -14,8 +14,7 @@ export function withRules(
 
 export async function readRules($: EngineInterface): Promise<string | undefined> {
   try {
-    const text = await $.fs.read(`${$.plugin.root}/${RULES_PATH}`)
-    return typeof text === 'string' ? text : undefined
+    return await $.fs.read(`${$.plugin.root}/${RULES_PATH}`)
   } catch {
     return undefined
   }

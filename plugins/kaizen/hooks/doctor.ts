@@ -1,12 +1,12 @@
 import type { EngineInterface } from 'claude-code'
 
-import { RULES_PATH } from './rules'
+import { readRules, RULES_PATH } from './rules'
 
 export const USAGE = 'Usage: /kaizen doctor'
 
 async function version($: EngineInterface): Promise<string> {
   const manifest = await $.fs.read(`${$.plugin.root}/.claude-plugin/plugin.json`)
-  return typeof manifest === 'string' ? JSON.parse(manifest).version : 'unknown'
+  return JSON.parse(manifest).version
 }
 
 async function hasGh($: EngineInterface): Promise<boolean> {
@@ -19,7 +19,7 @@ async function hasGh($: EngineInterface): Promise<boolean> {
 }
 
 export async function doctorReport($: EngineInterface): Promise<string> {
-  const rules = await $.fs.exists(`${$.plugin.root}/${RULES_PATH}`)
+  const rules = (await readRules($)) !== undefined
   return [
     `kaizen ${await version($)}`,
     `rules: ${rules ? 'found' : `missing (${RULES_PATH})`}`,

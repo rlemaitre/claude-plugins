@@ -7,7 +7,7 @@ export const register: Register = on => {
   on('prompt.context', async ($, e, next) => {
     const result = await next(e)
     return { ...result, blocks: withRules(result.blocks, await readRules($)) }
-  }).catch(($, e, next) => next(e))
+  })
 
   on('session.start', async ($, e, next) => {
     await $.command.register({ name: 'kaizen', description: 'kaizen: doctor', argumentHint: '[doctor]' })
