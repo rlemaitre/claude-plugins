@@ -280,10 +280,11 @@ Everything Raph reads goes inside Claude Code where possible.
   SVG) and opens it with `$.browser.open`, not in a new terminal pane.
 - **Session changes:** a view of the files the session changed and their diffs. It is fed by the `tool.call` results of
   edits and writes, plus `git diff` for changes made through shell commands.
-- **PRs and issues:** GitHub PRs and issues, and Linear issues, shown inside Claude Code through `$.browser.open` on
-  their URL. Builder's call, to verify in step 1 of section 11: terminal-browser keeps its own browser profile, so
-  private repos and the Linear workspace may need a one-time sign-in there. If that does not work, the harness renders
-  them from CLI data (`gh pr view --json`, Linear's API) into a local page instead.
+- **PRs and issues:** GitHub PRs and issues, and Linear issues, are rendered from CLI data (`gh pr view --json`,
+  `gh issue view --json`, Linear's API) into a local page, opened with `$.browser.open`. No sign-in in the browser, and
+  the CLI-first rule holds. (Raph's decision, 2026-11-28, after section 11's check: signing in inside the pane is
+  awkward because a paste goes to Claude's prompt, not to the page.) The browser itself stays for documents and public
+  pages.
 - **Images and diagrams:** kitty-image, as today.
 
 ### 6.4 Memory
@@ -402,7 +403,10 @@ Built from scratch inside the harness; it replaces the productivity plugin's tas
      skipped by `cc-plugin-sec-default`; Superpowers' classic `SessionStart` context reaches the model. So kaizen 0.2.0
      injects its rules through a classic `SessionStart` hook; on athena the rules appear once and come back after
      `/compact` (`SessionStart:compact`).
-   - terminal-browser sign-in to GitHub and Linear: not verified yet.
+   - Verified 2026-11-28 on both Macs: the rules reach the model at work with kaizen 0.2.0. The terminal-browser pane
+     draws in Rex only with `CLAUDE_CODE_FORCE_TERMINAL_IMAGES=1` (the dotfiles' `~/.zshenv` sets it; a session
+     started before that change lacks it). Signing in to GitHub and Linear in the pane works and persists, but a paste
+     goes to Claude's prompt, so PRs and issues are rendered from CLI data instead (6.3).
 2. Then the core behavior (section 4), then one workflow end to end (Fix is the smallest), then the others.
 3. Superpowers and the absorbed plugins stay installed until the harness covers what they did; each is removed in its
    own step.
