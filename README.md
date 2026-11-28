@@ -12,6 +12,7 @@ Raph's personal [Claude Code](https://code.claude.com) plugin marketplace.
 | `intellij` | Hooks that keep the `.idea` files IntelliJ rewrites on its own out of Claude's commits, and notify you when IntelliJ waits for you to approve a run configuration. See `plugins/intellij/README.md`. | none (own plugin) |
 | `worktree-sessions` | `/worktree-sessions:issue`, `pr-review` and `resume`: start a Linear issue or a PR review in its own worktree and Claude session (Ghostty tab, IntelliJ), and resume it later. See `plugins/worktree-sessions/README.md`. | none (own plugin) |
 | `pr-flow` | `/pr-flow:pr-gate`, `pr-babysit`, `pr-review-guide` and `review-feedback`: a pre-PR gate with reviews and a comprehension check, a PR babysitter, review guides, and a monthly loop that turns repeated review comments into rules. See `plugins/pr-flow/README.md`. | none (own plugin) |
+| `office` | Skill `xlsx-numbers`: read, write and verify .xlsx files viewed in Apple Numbers, without Excel or LibreOffice. Needs uv: see `plugins/office/README.md`. | none (own plugin) |
 
 ## Install
 
@@ -22,6 +23,7 @@ Raph's personal [Claude Code](https://code.claude.com) plugin marketplace.
     claude plugin install intellij@rlemaitre
     claude plugin install worktree-sessions@rlemaitre
     claude plugin install pr-flow@rlemaitre
+    claude plugin install office@rlemaitre
 
 ## Keeping copies in sync with upstream
 

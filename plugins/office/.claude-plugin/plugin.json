@@ -1,0 +1,8 @@
+{
+  "name": "office",
+  "version": "0.1.0",
+  "description": "Office files without Microsoft or LibreOffice: xlsx viewed in Apple Numbers",
+  "author": {
+    "name": "Raphaël Lemaitre"
+  }
+}

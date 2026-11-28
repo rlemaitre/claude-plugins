@@ -42,6 +42,12 @@
       "displayName": "PR flow",
       "description": "Pull request skills: a pre-PR gate with reviews and a comprehension check, a PR babysitter, review guides, and a monthly review-feedback loop that turns repeated comments into rules.",
       "source": "./plugins/pr-flow"
+    },
+    {
+      "name": "office",
+      "displayName": "Office",
+      "description": "Office files without Microsoft or LibreOffice: read, write and verify .xlsx files viewed in Apple Numbers.",
+      "source": "./plugins/office"
     }
   ]
 }
