@@ -13,6 +13,7 @@ Raph's personal [Claude Code](https://code.claude.com) plugin marketplace.
 | `worktree-sessions` | `/worktree-sessions:issue`, `pr-review` and `resume`: start a Linear issue or a PR review in its own worktree and Claude session (Ghostty tab, IntelliJ), and resume it later. See `plugins/worktree-sessions/README.md`. | none (own plugin) |
 | `pr-flow` | `/pr-flow:pr-gate`, `pr-babysit`, `pr-review-guide` and `review-feedback`: a pre-PR gate with reviews and a comprehension check, a PR babysitter, review guides, and a monthly loop that turns repeated review comments into rules. See `plugins/pr-flow/README.md`. | none (own plugin) |
 | `office` | Skill `xlsx-numbers`: read, write and verify .xlsx files viewed in Apple Numbers, without Excel or LibreOffice. Needs uv: see `plugins/office/README.md`. | none (own plugin) |
+| `kaizen` | Raph's harness: one way of working with Claude Code that routes each task (create, fix, review, maintain, write, explore) to its workflow. Early skeleton: injects its rules and answers `/kaizen doctor`. See `plugins/kaizen/README.md`. | none (own plugin) |
 
 ## Install
 
@@ -24,6 +25,7 @@ Raph's personal [Claude Code](https://code.claude.com) plugin marketplace.
     claude plugin install worktree-sessions@rlemaitre
     claude plugin install pr-flow@rlemaitre
     claude plugin install office@rlemaitre
+    claude plugin install kaizen@rlemaitre
 
 ## Keeping copies in sync with upstream
 

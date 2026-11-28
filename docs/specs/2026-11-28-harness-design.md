@@ -44,8 +44,9 @@ review, maintain, write, explore). It replaces Superpowers, ECC's rules and agen
 - **Work data stays on the work Mac.** Nothing from work (memory content, review findings, rules learned from work
   PRs, tasks) reaches the public repo. Rules learned from a work project live in that project's own repo.
 - **Public repo.** No secrets, tokens or private data in the harness.
-- **Mods need `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1`.** It is set in the dotfiles' Claude settings seed
-  (`home/dot_claude/create_private_settings.json`); the work Mac must have it too.
+- **Mods need no setting** on Claude Code 2.1.311: they load without `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS`, which
+  this Mac's live settings do not set (found while building the skeleton, 2026-11-28). The dotfiles seed still sets it;
+  harmless.
 - **Mod API is early access.** It changes between Claude Code releases. The harness type-checks against the generated
   types and runs `claude plugin validate` in its tests.
 - **Raph's global rules apply:** simplicity first, all English, Markdown wrapped at 120 columns, conventional commits,
@@ -336,9 +337,9 @@ Built from scratch inside the harness; it replaces the productivity plugin's tas
   when a newer one exists. Marketplace auto-update is not relied on.
 - **Tools are installed by the dotfiles only.** The harness never installs anything. It keeps one list of what it needs,
   with the machine each item is for and how to check it: CLIs (`gh`, `gcloud`, `sentry-cli`, pandoc…), MCP connectors
-  (Gmail, Calendar, Slack), settings (`CLAUDE_CODE_ENABLE_FUNCTION_HOOKS`), sign-ins (`gh auth status`…).
+  (Gmail, Calendar, Slack), sign-ins (`gh auth status`…).
 - **Checks:**
-  1. at session start, a cheap one: CLIs exist and the mods setting is on; anything missing is said in one line, with a
+  1. at session start, a cheap one: CLIs exist; anything missing is said in one line, with a
      proposal to add it to the dotfiles packages through the dotfiles recipe;
   2. deeper checks when a phase needs the tool (`gh auth status` before a review, the Sentry sign-in before a fix);
   3. `/kaizen doctor` runs every check on demand and reports what is missing on this Mac.
@@ -391,6 +392,11 @@ Built from scratch inside the harness; it replaces the productivity plugin's tas
 
 1. **Skeleton first, on both Macs:** an empty mod that injects one rule and shows it loaded. Install it on the work
    Mac before building more, to confirm the Enterprise org allows it.
+   - Verified 2026-11-28 on athena (Claude Code 2.1.311, `--plugin-dir`, headless): `/kaizen doctor` answers; the
+     model quotes the `kaizen` context block; after `/compact` in the same session it still quotes the rules text, so
+     `prompt.context` blocks survive compaction with no extra hook.
+   - Work Mac: not verified yet.
+   - terminal-browser sign-in to GitHub and Linear: not verified yet.
 2. Then the core behavior (section 4), then one workflow end to end (Fix is the smallest), then the others.
 3. Superpowers and the absorbed plugins stay installed until the harness covers what they did; each is removed in its
    own step.

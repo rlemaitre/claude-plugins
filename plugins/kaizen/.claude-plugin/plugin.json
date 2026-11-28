@@ -1,1 +1,8 @@
-{ "name": "kaizen", "version": "0.1.0", "description": "Raph's way of working with Claude Code: routes each task to its workflow, with rules that improve from reviews and corrections." }
+{
+  "name": "kaizen",
+  "version": "0.1.0",
+  "description": "Raph's way of working with Claude Code: routes each task to its workflow, with rules that improve from reviews and corrections.",
+  "author": {
+    "name": "Raphaël Lemaitre"
+  }
+}

@@ -48,6 +48,12 @@
       "displayName": "Office",
       "description": "Office files without Microsoft or LibreOffice: read, write and verify .xlsx files viewed in Apple Numbers.",
       "source": "./plugins/office"
+    },
+    {
+      "name": "kaizen",
+      "displayName": "kaizen",
+      "description": "Raph's way of working with Claude Code: routes each task to its workflow, with rules that improve from reviews and corrections.",
+      "source": "./plugins/kaizen"
     }
   ]
 }
