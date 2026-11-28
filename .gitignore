@@ -3,3 +3,6 @@ __pycache__/
 *.xlsx
 !plugins/**/fixtures/*.xlsx
 .DS_Store
+
+# Types the engine writes beside a mod loaded from its folder
+plugins/*/.claude-plugin/types/
