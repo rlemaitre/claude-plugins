@@ -19,11 +19,9 @@ async function hasGh($: EngineInterface): Promise<boolean> {
 }
 
 export async function doctorReport($: EngineInterface): Promise<string> {
-  const mods = (await $.env.get('CLAUDE_CODE_ENABLE_FUNCTION_HOOKS')) === '1'
   const rules = await $.fs.exists(`${$.plugin.root}/${RULES_PATH}`)
   return [
     `kaizen ${await version($)}`,
-    `mods: ${mods ? 'on' : 'off'}`,
     `rules: ${rules ? 'found' : `missing (${RULES_PATH})`}`,
     `gh: ${(await hasGh($)) ? 'found' : 'missing'}`,
   ].join('\n')

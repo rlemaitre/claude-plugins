@@ -7,27 +7,24 @@ const GH_OK = { exitCode: 0, stdout: 'gh version 2.0.0', stderr: '', isStdoutTru
 
 test('doctor reports a healthy install', async ($, on) => {
   on('fs.read', () => ({ value: MANIFEST }))
-  on('env.get', () => ({ value: '1' }))
   on('fs.exists', () => ({ value: true }))
   on('process.run', () => ({ value: GH_OK }))
   const { text } = await $.command.run({ ...RUN, command: 'kaizen', args: 'doctor' })
-  expect(text).toBe('kaizen 0.1.0\nmods: on\nrules: found\ngh: found')
+  expect(text).toBe('kaizen 0.1.0\nrules: found\ngh: found')
 })
 
 test('doctor reports what is missing', async ($, on) => {
   on('fs.read', () => ({ value: MANIFEST }))
-  on('env.get', () => ({ value: undefined }))
   on('fs.exists', () => ({ value: false }))
   on('process.run', () => {
     throw new Error('ENOENT')
   })
   const { text } = await $.command.run({ ...RUN, command: 'kaizen', args: 'doctor' })
-  expect(text).toBe('kaizen 0.1.0\nmods: off\nrules: missing (rules/core.md)\ngh: missing')
+  expect(text).toBe('kaizen 0.1.0\nrules: missing (rules/core.md)\ngh: missing')
 })
 
 test('doctor treats a failing gh as missing', async ($, on) => {
   on('fs.read', () => ({ value: MANIFEST }))
-  on('env.get', () => ({ value: '1' }))
   on('fs.exists', () => ({ value: true }))
   on('process.run', () => ({ value: { ...GH_OK, exitCode: 1 } }))
   const { text } = await $.command.run({ ...RUN, command: 'kaizen', args: 'doctor' })
