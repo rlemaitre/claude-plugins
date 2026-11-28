@@ -4,7 +4,7 @@ import { withRules } from './rules'
 test('adds the kaizen block after the engine blocks', () => {
   const blocks = withRules([{ name: 'currentDate', text: '2026-11-28' }], 'RULES')
   expect(blocks.map(b => b.name)).toEqual(['currentDate', 'kaizen'])
-  expect(blocks[1].text).toBe('RULES')
+  expect(blocks[1]?.text).toBe('RULES')
 })
 
 test('adds the block when the context is empty', () => {
