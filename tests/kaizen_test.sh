@@ -47,4 +47,10 @@ for heading in "## Asking" "## Simplicity" "## Enforcement" "## Work" "## Git an
   if grep -qxF "$heading" "$PLUGIN/rules/core.md"; then pass "core.md has $heading"; else fail "core.md has $heading"; fi
 done
 
+if grep -qF "<type>: <description>" "$PLUGIN/rules/core.md"; then
+  pass "core.md keeps the conventional-commit format"
+else
+  fail "core.md keeps the conventional-commit format"
+fi
+
 exit "$failures"

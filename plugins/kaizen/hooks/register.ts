@@ -13,9 +13,12 @@ export const register: Register = on => {
     text: e.args.trim() === 'doctor' ? await doctorReport($) : USAGE,
   }))
 
-  on('tool.check', { tool: 'Bash' }, ($, e, next) => {
+  on('tool.check', { tool: 'Bash' }, async ($, e, next) => {
     const command = (e.input as { command?: unknown } | undefined)?.command
     const verdict = typeof command === 'string' ? guardVerdict(command) : undefined
-    return verdict ?? next(e)
-  }).catch(($, e, next) => next(e))
+    if (verdict?.decision === 'deny') return verdict
+    const beneath = await next(e)
+    // An ask must never hide a deny from another guard, a rule or the classifier.
+    return verdict === undefined || beneath.decision === 'deny' ? beneath : verdict
+  })
 }

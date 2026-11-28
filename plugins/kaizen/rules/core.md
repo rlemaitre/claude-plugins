@@ -50,6 +50,8 @@ files first
 
 ## Git and PRs
 
+- Commit messages: `<type>: <description>`, types feat, fix, refactor, docs, test, chore, perf, ci. No attribution
+  lines (Co-Authored-By, "Generated with").
 - When creating PRs, organize work into logical separate commits BEFORE opening
   the PR (don't squash everything into one commit)
 - PR descriptions must cover the entire branch diff, not just the latest commit

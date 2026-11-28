@@ -19,6 +19,18 @@ const CASES: [string, 'deny' | 'ask' | undefined][] = [
   ['git commit -m "add -A flag"', undefined],
   ['echo git push', undefined],
   ['git log --all', undefined],
+  ['(cd ../repo && git push)', 'ask'],
+  ['(git add -A)', 'deny'],
+  ['env git push', 'ask'],
+  ['GIT_DIR=x git push --force', 'deny'],
+  ['/usr/bin/git add -A', 'deny'],
+  ['sleep 1 & git push', 'ask'],
+  ['echo $(git push)', 'ask'],
+  ['echo `git push -f`', 'deny'],
+  ['git add -u', 'deny'],
+  ['git add --update', 'deny'],
+  ['git add -Av', 'deny'],
+  ['git add -p src/a.ts', undefined],
 ]
 
 for (const [command, decision] of CASES) {
@@ -62,4 +74,11 @@ test('the tool.check hook passes a malformed input to the engine', async ($, on)
   on('tool.check', () => ({ decision: 'allow' }))
   const result = await $.tool.check({ tool: 'Bash', input: 42 })
   expect(result.decision).toBe('allow')
+})
+
+test('an ask never hides a deny from beneath', async ($, on) => {
+  on('tool.check', () => ({ decision: 'deny', reason: 'engine says no' }))
+  const result = await $.tool.check({ tool: 'Bash', input: { command: 'git push' } })
+  expect(result.decision).toBe('deny')
+  expect(result.reason).toBe('engine says no')
 })
